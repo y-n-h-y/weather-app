@@ -16,6 +16,15 @@ body {
   animation: gradietionAnimation 9s ease infinite;
 }
 
+.sp {
+  display: none;
+}
+@media screen and (max-width: 410px) {
+  .sp {
+    display: block;
+  }
+}
+
 main .container {
   position: relative;
   width: 100%;
