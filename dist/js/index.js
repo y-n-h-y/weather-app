@@ -29,7 +29,7 @@ function strDate() {
     const seconds = nowDate.getSeconds();
 
     const dateText = `${year}.${month}.${day}.${todayWeek}`;
-    const timeText = `${hours}.${minutes}.${seconds}`;
+    const timeText = `${hours.toString().padStart('2', '0')}.${minutes.toString().padStart('2', '0')}.${seconds.toString().padStart('2', '0')}`;
 
     dateElm.textContent = dateText;
     timeElm.textContent = timeText;
@@ -39,15 +39,15 @@ setInterval(strDate, 1000);
 
 
 function request() {
-    return new Promise(function (resolve) {
+    return new Promise(function (resolve) {//天気予報のデータをリクエスト
         fetch('https://api.open-meteo.com/v1/forecast?latitude=35.6785&longitude=139.6823&hourly=temperature_2m,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo')
             .then(function (response) {
-                if (response.ok) {
+                if (response.ok) {//レスポンスがokだったらJSON形式に変換
                     return response.json();
                 } else {
                     console.log('通信エラー');
                 }
-            }).then(function (data) {
+            }).then(function (data) {//変換が出来たら1時間事の天気予報（hourly）と、週間天気予報（daily）のデータを配列にする
                 resolve([data['hourly'], data['daily']]);
             });
     })
@@ -92,6 +92,7 @@ function modalBgColor(name) {
     }
 }
 
+//ウェザーコードの値に応じて、text・bgColor・dataをobjectに格納して返す
 function weatherCode(codeData) {
     switch (true) {
         case codeData === 0:
