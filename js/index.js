@@ -6,29 +6,31 @@ const degree = document.querySelector('.degree');
 const middleBlock = document.querySelector('.middleBlock');
 const modalBg = document.querySelector('.modalBg');
 const modalBox = document.querySelector('.modal-box');
-const weekHourly = document.createElement('ul');
-const timeLine = document.createElement('ul');
-
+let weekHourlyHtml = '';
+let detailHtml = '';
+let dayOfWeek;
 let weatherCodeObject = {};
 let modalTextObject = {};
 
 let animationFlag = false;
 
 const week = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-
 const date = new Date();
+let year;
+let month;
+let day;
 
 function strDate() {
     const nowDate = new Date();
-    const year = nowDate.getFullYear();
-    const month = nowDate.getMonth() + 1;
-    const day = nowDate.getDate();
-    const todayWeek = week[nowDate.getDay()];
+    year = nowDate.getFullYear();
+    month = nowDate.getMonth() + 1;
+    day = nowDate.getDate();
+    const todayOfWeek = week[nowDate.getDay()];
     const hours = nowDate.getHours();
     const minutes = nowDate.getMinutes();
     const seconds = nowDate.getSeconds();
 
-    const dateText = `${year}.${month}.${day}.${todayWeek}`;
+    const dateText = `${year}.${month}.${day}.${todayOfWeek}`;
     const timeText = `${hours.toString().padStart('2', '0')}.${minutes.toString().padStart('2', '0')}.${seconds.toString().padStart('2', '0')}`;
 
     dateElm.textContent = dateText;
@@ -53,44 +55,44 @@ function request() {
     })
 }
 
-function modalBgColor(name) {
-    switch (name) {
-        case "fineWeather":
-            modalBox.style.backgroundColor = "rgba(238, 99, 0, 0.9)";
-            modalTextObject.color = "rgba(238, 99, 0, 0.9)";
-            break;
-        case "sunny":
-            modalBox.style.backgroundColor = "rgba(238, 99, 0, 0.9)";
-            break;
-        case "partlyCloudy":
-            modalBox.style.backgroundColor = "rgba(214, 93, 0, 0.9)";
-            break;
-        case "cloudy":
-            modalBox.style.backgroundColor = "rgba(77, 77, 77, 0.9)";
-            break;
-        case "fog":
-            modalBox.style.backgroundColor = "rgba(112, 128, 144, 0.9)";
-            break;
-        case "drizzle":
-            modalBox.style.backgroundColor = "rgba(22, 94, 131, 0.9)";
-            break;
-        case "rain":
-            modalBox.style.backgroundColor = "rgba(65, 105, 225, 0.9)";
-            break;
-        case "snow":
-            modalBox.style.backgroundColor = "rgba(25, 0, 99, 0.9)";
-            break;
-        case "shower":
-            modalBox.style.backgroundColor = "rgba(106, 90, 205, 0.9)";
-            break;
-        case "hail":
-            modalBox.style.backgroundColor = "rgba(77, 77, 77, 0.9)";
-            break;
-        case "thunderstorm":
-            modalBox.style.backgroundColor = "rgba(248, 180, 0, 0.9)";
-            break;
-    }
-}
+// function modalBgColor(name) {
+//     switch (name) {
+//         case "fineWeather":
+//             modalBox.style.backgroundColor = "rgba(238, 99, 0, 0.9)";
+//             modalTextObject.color = "rgba(238, 99, 0, 0.9)";
+//             break;
+//         case "sunny":
+//             modalBox.style.backgroundColor = "rgba(238, 99, 0, 0.9)";
+//             break;
+//         case "partlyCloudy":
+//             modalBox.style.backgroundColor = "rgba(214, 93, 0, 0.9)";
+//             break;
+//         case "cloudy":
+//             modalBox.style.backgroundColor = "rgba(77, 77, 77, 0.9)";
+//             break;
+//         case "fog":
+//             modalBox.style.backgroundColor = "rgba(112, 128, 144, 0.9)";
+//             break;
+//         case "drizzle":
+//             modalBox.style.backgroundColor = "rgba(22, 94, 131, 0.9)";
+//             break;
+//         case "rain":
+//             modalBox.style.backgroundColor = "rgba(65, 105, 225, 0.9)";
+//             break;
+//         case "snow":
+//             modalBox.style.backgroundColor = "rgba(25, 0, 99, 0.9)";
+//             break;
+//         case "shower":
+//             modalBox.style.backgroundColor = "rgba(106, 90, 205, 0.9)";
+//             break;
+//         case "hail":
+//             modalBox.style.backgroundColor = "rgba(77, 77, 77, 0.9)";
+//             break;
+//         case "thunderstorm":
+//             modalBox.style.backgroundColor = "rgba(248, 180, 0, 0.9)";
+//             break;
+//     }
+// }
 
 //ウェザーコードの値に応じて、text・bgColor・dataをobjectに格納して返す
 function weatherCode(codeData) {
@@ -166,19 +168,20 @@ function nowWeather(temperature, code) {
 
 //一週間の天気予報を表示
 function weekWeather(temperatureMax, temperatureMin, code, time) {
-    for (let i = 1; i < code.length; i++) {
-        const timeCompile = time[i].substring(6, 10).replace('-', '.');
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const day = date.getDate() + i;
-        const dayOfWeek = new Date(year, month, day);
-        const todayWeek = week[dayOfWeek.getDay()];
-        weatherCode(code[i]);
-        const list =
+    const codeLength = code.length;
+    for (let i = 1; i < codeLength; i++) {
+        timeCompile = time[i].substring(5).replace('-', '.');//一日ずつの日付を表示
+        year = date.getFullYear();
+        month = date.getMonth();
+        day = date.getDate() + i;
+        const dayOfBirth = new Date(year, month, day);
+        dayOfWeek = week[dayOfBirth.getDay()];//曜日を取得
+        weatherCode(code[i]);//1日単位の天気予報を取得
+        weekHourlyHtml +=
             `<li>
                 <div class="wrapWeek box" style="background: ${weatherCodeObject.bgColor}">
                     <div class="weekDay">
-                        <p>${timeCompile}.${todayWeek}</p>
+                        <p>${timeCompile}.${dayOfWeek}</p>
                     </div>
                     <div class="weekCode">
                         <p>${weatherCodeObject.text}</p>
@@ -189,20 +192,16 @@ function weekWeather(temperatureMax, temperatureMin, code, time) {
                 </div>
             </li>`
             ;
-        weekHourly.innerHTML += list;
     }
-    middleBlock.append(weekHourly);
+    middleBlock.innerHTML = `<ul>${weekHourlyHtml}</ul>`;
 }
 
 //一日の天気の詳細を表示
 function modalInnerElm(timeList, codeList, temperatureList, dayTemperatureMax, dayTemperatureMIn, dayCode, month, day, dayOfWeek) {
 
-    const modalInner = document.createElement('div');
-    modalInner.classList.add('modal-inner');
+    weatherCode(dayCode);//1日単位のウェザーコードを取得
 
-    weatherCode(dayCode);
-
-    const detailDate = `
+    let detailDate = `
     <div class="detailBlock01">
         <p>${month}.${day}.${dayOfWeek}</p>
     </div>
@@ -215,12 +214,11 @@ function modalInnerElm(timeList, codeList, temperatureList, dayTemperatureMax, d
         <div>
     </div>
     `;
-    modalInner.innerHTML = detailDate;
-    modalInner.append(timeLine);
 
     for (let i = 0; i < timeList.length; i++) {
         weatherCode(codeList[i])
-        const detailList = `
+        detailHtml += 
+            `
             <li data-name="${weatherCodeObject.data}">
                 <div class="timeLineBlock01">
                     <p>${timeList[i].slice(11, 16)}</p>
@@ -233,24 +231,32 @@ function modalInnerElm(timeList, codeList, temperatureList, dayTemperatureMax, d
                 </div>
             </li>
             `;
-        timeLine.innerHTML += detailList;
     }
 
-    modalBox.append(modalInner);
+    modalBox.innerHTML = 
+    `
+        <div class="modal-inner">
+            ${detailDate}
+            <ul>
+            ${detailHtml}
+            </ul>
+        </div>
+    `;
+    const modalInner = document.querySelector('.modal-inner');
 
     modalBox.addEventListener('animationend', function () {//モーダルインナー要素表示
+        // const timeLineList = modalBox.getElementsByTagName('li');
         modalInner.classList.add('open');
-        const timeLineList = modalBox.getElementsByTagName('li');
-        for (const timeLine of timeLineList) {
-            timeLine.addEventListener('mouseover', function () {
-                modalBgColor(timeLine.dataset.name);
-                modalBox.style.color = "#fff";
-            });
-            timeLine.addEventListener('mouseout', function () {
-                modalBox.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
-                modalBox.style.color = "#000";
-            });
-        }
+        // for (const timeLine of timeLineList) {
+        //     timeLine.addEventListener('mouseover', function () {
+        //         modalBgColor(timeLine.dataset.name);
+        //         modalBox.style.color = "#fff";
+        //     });
+        //     timeLine.addEventListener('mouseout', function () {
+        //         modalBox.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
+        //         modalBox.style.color = "#000";
+        //     });
+        // }
     });
 
     modalBg.addEventListener('click', function () {//モーダルクローズ
@@ -260,14 +266,12 @@ function modalInnerElm(timeList, codeList, temperatureList, dayTemperatureMax, d
     });
 
     modalBox.addEventListener('animationend', function () {//モーダルBgクローズ
+        detailDate = '';
+        detailHtml = '';
         if (animationFlag) {
             modalBg.classList.remove('modalOpen');
             modalBox.classList.remove('modalOpen');
             modalInner.classList.remove('open');
-            while (timeLine.firstChild) {
-                timeLine.removeChild(timeLine.firstChild);
-            }
-            modalBox.removeChild(modalBox.firstChild);
         }
         animationFlag = false;
     });
@@ -282,19 +286,19 @@ function modalInnerdata(temperatureMax, temperatureMin, weeksCode, temperatureLi
     let weekTemperatureMax;
     let weekTemperatureMIn;
     let weekCode;
-    let year = date.getFullYear();
 
     function dataGroup(num) {
-        let month = date.getMonth() + 1;
-        let day = date.getDate();
-        let dateOfBirth = new Date(year, month, day);
-        dayOfWeek = week[dateOfBirth.getDay()];
-        variableTime = timeList.slice(num * 24, (num + 1) * 24);
-        variableCode = codeList.slice(num * 24, (num + 1) * 24);
-        variableTemperture = temperatureList.slice(num * 24, (num + 1) * 24);
-        weekTemperatureMax = temperatureMax[num];
-        weekTemperatureMIn = temperatureMin[num];
-        weekCode = weeksCode[num];
+        year = date.getFullYear();
+        month = date.getMonth() + 1;
+        day = date.getDate() + num;
+        dayOfBirth = new Date(year, (month - 1), day);
+        dayOfWeek = week[dayOfBirth.getDay()];//曜日を取得
+        variableTime = timeList.slice(num * 24, (num + 1) * 24);//1週間分の時間配列を、1日（24時間）ずつに区切る
+        variableCode = codeList.slice(num * 24, (num + 1) * 24);//1週間分のウェザーコード配列を、1日（24時間）ずつに区切る
+        variableTemperture = temperatureList.slice(num * 24, (num + 1) * 24);//1週間分の気温配列を、1日（24時間）ずつに区切る
+        weekTemperatureMax = temperatureMax[num];//1週間分の最高気温を1日ずつに区切る
+        weekTemperatureMIn = temperatureMin[num];//1週間分の最低気温を1日ずつに区切る
+        weekCode = weeksCode[num];//1週間分のウェザーコードを、1日ずつに区切る
         modalInnerElm(variableTime, variableCode, variableTemperture, weekTemperatureMax, weekTemperatureMIn, weekCode, month, day, dayOfWeek);
         modalBg.classList.add('modalOpen');
         modalBox.classList.add('modalOpen');
